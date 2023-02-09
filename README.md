@@ -1,7 +1,7 @@
 # stochastic_processes
 Python programs for solving Markov Chain and Martingale Problems
 
-## Solving Irreducible Markov Chains for the Stationary Distribution
+## Solving Irreducible Markov Chain for the Stationary Distribution
 
 First, edit stat_dist.py to use the desired matrix, then run the following command
 ```
@@ -10,7 +10,7 @@ python stat_dist.py
 
 Output = π, where π(x) is the long term proportion of time spent in state x
 
-## Solving Reducible Markov Chains for Hitting Probabilities and Transient State Visits
+## Solving Reducible Markov Chain for Hitting Probabilities and Transient State Visits
 
 **note: the order of transient states WILL change, but their relative order will not change
 
