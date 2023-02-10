@@ -8,7 +8,7 @@ transition_mat = np.matrix([
 ])
 
 S, U = eig(transition_mat.T)
-stationary = np.array(U[:,np.isclose(S,1)].flat).real
+stationary = np.array(U[:,np.isclose(S,1)].flat)
 stationary = stationary / np.sum(stationary)
 stationary = [str(frac(x).limit_denominator()) for x in stationary]
 print(stationary)

@@ -25,15 +25,20 @@ def scc(mat):
             classes.append(cl)
     return classes[:-1]
 
+def transient(indices, recurrent_classes):
+    new = []
+    for i,r in enumerate(indices):
+        if find_class(i, recurrent_classes) == -1:
+            new.append(r)
+    return new
+
 def find_class(j, classes):
     for i,c in enumerate(classes): 
         if j in c:
             return i
-    return False
+    return -1
 
-def get_S_and_Q(mat):
-    classes = scc(mat)
-    print("recurrent classes", classes)
+def get_S_and_Q(mat, classes):
     r = len(classes)
     S = [[0 for _ in range(r)] for _ in range(len(mat)-r)]
     Q = [[0 for _ in range(len(mat[0])-r)] for _ in range(len(mat)-r)]
@@ -41,7 +46,7 @@ def get_S_and_Q(mat):
     for c in classes:
         for a in c:
             rs.append(a)
-    
+            
     q = 0
     for i,row in enumerate(mat):
         if i in rs:
@@ -75,38 +80,26 @@ mat = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
 ]
 
-S,Q = get_S_and_Q(mat)
+recurrent_classes = scc(mat)
+transient_states = transient(indices, recurrent_classes)
+S,Q = get_S_and_Q(mat, recurrent_classes)
 M = np.linalg.inv(np.identity(len(Q))-Q)
 hitting_probabilities = M*S
-print("returns:\n",M)
+print("recurrent classes:", [[indices[i] for i in c] for c in recurrent_classes])
+print("transient states:", transient_states)
+print("visits:\n",M)
 print("hitting probabilities:\n",hitting_probabilities)
 # print([[frac(str(x)) for x in y] for y in hitting_probabilities])
 print("Nate's probability of winning is %f" % hitting_probabilities[-1,1])
 print("Nate's probability of losing is %f" % hitting_probabilities[-1,0])
-print("Nate's expected winnings is %f" % (hitting_probabilities[-1,1]*2 - hitting_probabilities[-1,0]*20))
+print("Nate's expected winnings is %f" % round(hitting_probabilities[-1,1]*2 - hitting_probabilities[-1,0]*20))
 print("Justin's probability of winning is %f" % hitting_probabilities[0,1])
 print("Justin's probability of losing is %f" % hitting_probabilities[0,0])
-print("Justin's expected winnings is %f" % (hitting_probabilities[0,1]*20 - hitting_probabilities[0,0]*2))
-
-# example transformed matrix
-transition_mat = [
-    # [0, 22, 2, 4, 6, 8, 10,12,14,16,18,20]
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],\
-    [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],\
-    [.5, 0, 0, .5, 0, 0, 0, 0, 0, 0, 0, 0],\
-    [.5, 0, 0, 0, 0, .5, 0, 0, 0, 0, 0, 0],\
-    [.5, 0, 0, 0, 0, 0, 0, .5, 0, 0, 0, 0],\
-    [.5, 0, 0, 0, 0, 0, 0, 0, 0, .5, 0, 0],\
-    [.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .5],\
-    [0, .5, .5, 0, 0, 0, 0, 0, 0, 0, 0, 0],\
-    [0, .5, 0, 0, .5, 0, 0, 0, 0, 0, 0, 0],\
-    [0, .5, 0, 0, 0, 0, .5, 0, 0, 0, 0, 0],\
-    [0, .5, 0, 0, 0, 0, 0, 0, .5, 0, 0, 0],\
-    [0, .5, 0, 0, 0, 0, 0, 0, 0, 0, .5, 0],\
-]
+print("Justin's expected winnings is %f" % round(hitting_probabilities[0,1]*20 - hitting_probabilities[0,0]*2))
 
 
-def get_S_and_Q(mat, recurrence_classes):
+# for if recurrence_classes are all are single states
+def get_S_and_Q_single_classes(mat, recurrence_classes):
     r = len(recurrence_classes)
     new_mat = np.matrix([[0 for _ in mat[0]] for _ in mat])
     S = [[0 for _ in range(r)] for _ in range(len(mat)-r)]

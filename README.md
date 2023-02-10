@@ -22,9 +22,34 @@ python reducible.py
 
 Output = the recurrent classes and transient states found, the expected number of visits to transient state j starting at transient state i (the (i,j) entry into the visits matrix), and the probability of hitting recurrent class j starting at transient state i (the (i,j) entry into the hitting probabilities matrix.
 
-Example Output: 
+### Example Usage:
+
+The origin of this example comes from a bet I made with my roommate. After playing poker, I had $20 in my pot and my roommate had $2, and we decided to go all in repeatedly until one of us one the other's money. I lost the bet and was shocked, so I wanted to find out what the odds were of me winning. I decided to model the problem as a Markov Chain, where the states are the amount of money I have, and the transitions are the amount of money I win or lose in each round. I then used the reducible.py program to find the hitting probabilities. I then used the hitting probabilities to find the probability of winning, and the transient state visits to find the expected winnings. I then compared my results to the actual results, and found that my results were very close to the actual results.
+
+Input:
+
 ```
-recurrent classes: [[0], [11]]
+indices = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]
+mat = [
+    # [0, 2, 4, 6, 8, 10,12,14,16,18,20,22]
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],\
+    [.5, 0, .5, 0, 0, 0, 0, 0, 0, 0, 0, 0],\
+    [.5, 0, 0, 0, .5, 0, 0, 0, 0, 0, 0, 0],\
+    [.5, 0, 0, 0, 0, 0, .5, 0, 0, 0, 0, 0],\
+    [.5, 0, 0, 0, 0, 0, 0, 0, .5, 0, 0, 0],\
+    [.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, .5, 0],\
+    [0, .5, 0, 0, 0, 0, 0, 0, 0, 0, 0, .5],\
+    [0, 0, 0, .5, 0, 0, 0, 0, 0, 0, 0, .5],\
+    [0, 0, 0, 0, 0, .5, 0, 0, 0, 0, 0, .5],\
+    [0, 0, 0, 0, 0, 0, 0, .5, 0, 0, 0, .5],\
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, .5, 0, .5],\
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+]
+```
+
+Output: 
+```
+recurrent classes: [[0], [22]]
 transient states: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
 visits:
  [[1.00097752 0.50048876 0.00391007 0.25024438 0.06256109 0.00195503
@@ -60,8 +85,8 @@ hitting probabilities:
  [0.09090909 0.90909091]]
 Nate's probability of winning is 0.909091
 Nate's probability of losing is 0.090909
-Nate's expected winnings is -0.000000
+Nate's expected winnings is 0.000000
 Justin's probability of winning is 0.090909
 Justin's probability of losing is 0.909091
-Justin's expected winnings is -0.000000
+Justin's expected winnings is 0.000000
 ```
