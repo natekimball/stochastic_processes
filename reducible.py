@@ -20,14 +20,15 @@ mat = [
 ]
 
 def main(mat):
-    if len(mat) != len(mat[0]):
+    mat = np.array(mat)
+    if mat.shape[0] != mat.shape[1]:
         print("not a square matrix")
         exit()
-    recurrent_classes = scc(mat)
+    recurrent_classes = get_recurrent(mat)
     transient_states = transient(indices, recurrent_classes)
     S,Q = get_S_and_Q(mat, recurrent_classes)
     M = np.linalg.inv(np.identity(len(Q))-Q)
-    hitting_probabilities = M*S
+    hitting_probabilities = M@S
     print("recurrent classes:", [[indices[i] for i in c] for c in recurrent_classes])
     print("transient states:", transient_states)
     print("S:\n",S)
@@ -45,7 +46,7 @@ def main(mat):
 def dfs(M, i, visited, order):
     visited[i] = True
     for j in range(len(M)):
-        if M[i][j] != 0 and not visited[j]:
+        if M[i,j] != 0 and not visited[j]:
             dfs(M, j, visited, order)
     order.insert(0,i)
 
@@ -63,17 +64,18 @@ def scc(M):
             cl = []
             dfs(M, i, visited, cl)
             classes.append(cl)
-    # print("classes:", classes)
-    return get_recurrent(M,classes)
+    return classes
 
-def get_recurrent(M, classes):
+def get_recurrent(M):
+    classes = scc(M)
     r = len(classes)
-    new_mat = [[0 for _ in range(r)] for _ in range(r)]
+    new_mat = np.zeros((r,r))
     for i in range(r):
         for j in range(r):
+            print(i,j)
             for a in classes[i]:
                 for b in classes[j]:
-                    new_mat[i][j] += M[a][b]
+                    new_mat[i,j] += M[a,b]
     visited = [False for _ in range(r)]
     l = []
     for i in range(r):
@@ -86,20 +88,15 @@ def only_recurrent(M, i, visited, order):
     visited[i] = True
     has_neighbors = False
     for j in range(len(M)):
-        if i!=j and M[i][j] != 0:
+        if i!=j and M[i,j] != 0:
             has_neighbors = True
             if not visited[j]:
                 dfs(M, j, visited, order)
     if not has_neighbors:
-        # order.insert(0,i)
         order.append(i)
     
 def transient(indices, recurrent_classes):
-    new = []
-    for i,r in enumerate(indices):
-        if find_class(i, recurrent_classes) == -1:
-            new.append(r)
-    return new
+    return [r for i,r in enumerate(indices) if find_class(i, recurrent_classes) == -1]
 
 def find_class(j, classes):
     for i,c in enumerate(classes): 
@@ -112,21 +109,20 @@ def get_S_and_Q(mat, recurrent):
     for c in recurrent:
         for a in c:
             rs.append(a)
-    S = [[0 for _ in range(len(recurrent))] for _ in range(len(mat)-len(rs))]
-    Q = [[0 for _ in range(len(mat[0])-len(rs))] for _ in range(len(mat)-len(rs))]
-    transient = []
-    for i in range(len(mat)):
-        if i not in rs:
-            transient.append(i)
+
+    S = np.zeros((mat.shape[0]-len(rs), len(recurrent)))
+    Q = np.zeros((mat.shape[0]-len(rs), mat.shape[0]-len(rs)))
+
     
+    transient = [i for i in range(mat.shape[0]) if i not in rs]
     for i,t in enumerate(transient):
         for j,r in enumerate(recurrent):
             for k in r:
-                S[i][j] += mat[t][k]
+                S[i,j]+=mat[t,k]
         for j,t2 in enumerate(transient):
-            Q[i][j] = mat[t][t2]
+            Q[i,j] = mat[t,t2]
 
-    return np.matrix(S), np.matrix(Q)
+    return S,Q
 
 if __name__ == "__main__":
     main(mat)
@@ -134,7 +130,7 @@ if __name__ == "__main__":
 # for if recurrence_classes are all are single states
 def get_S_and_Q_single_classes(mat, recurrence_classes):
     r = len(recurrence_classes)
-    new_mat = np.matrix([[0 for _ in mat[0]] for _ in mat])
+    new_mat = np.array([[0 for _ in mat[0]] for _ in mat])
     S = [[0 for _ in range(r)] for _ in range(len(mat)-r)]
     Q = [[0 for _ in range(len(mat[0])-r)] for _ in range(len(mat)-r)]
     q=0
@@ -149,4 +145,4 @@ def get_S_and_Q_single_classes(mat, recurrence_classes):
                 s+=1
             else:
                 Q[i-q][j-s] = mat[i][j]
-    return np.matrix(S), np.matrix(Q)
+    return np.array(S), np.array(Q)
