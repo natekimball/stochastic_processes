@@ -24,7 +24,7 @@ Output = the recurrent classes and transient states found, the expected number o
 
 ### Example Usage:
 
-The origin of this example comes from a bet I made with my roommate. After playing poker, I had $20 in my pot and my roommate had $2, and we decided to go all in repeatedly until one of us one the other's money. I lost the bet and was shocked, so I wanted to find out what the odds were of me winning. I decided to model the problem as a Markov Chain, where the states are the amount of money I have, and the transitions are the amount of money I win or lose in each round. I then used the reducible.py program to find the hitting probabilities. I then used the hitting probabilities to find the probability of winning, and the transient state visits to find the expected winnings. I then compared my results to the actual results, and found that my results were very close to the actual results.
+The origin of this example comes from a bet I made with my roommate. After playing poker, I had $20 in my pot and my roommate had $2, and we decided to go all-in repeatedly until one of us won the other's money. I was shocked to lose the bet, so I wanted to find out what the odds were of me winning. I decided to model the problem as a Markov Chain, where the states are the amount of money I have, and the transitions are the amount of money I win or lose in each round. I then used the reducible.py program to find the hitting probabilities, and thus, the probability of winning and expected value of the bet, which was 10/11 and $0, respectively.
 
 Input:
 
