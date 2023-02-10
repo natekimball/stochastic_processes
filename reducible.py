@@ -23,7 +23,37 @@ def scc(mat):
             cl = []
             dfs(mat, i, visited, cl)
             classes.append(cl)
-    return classes[:-1]
+    return get_classes(mat,classes)
+
+def get_classes(mat, classes):
+    r = len(classes)
+    new_mat = [[0 for _ in range(r)] for _ in range(r)]
+    for i in range(r):
+        for j in range(r):
+            for a in classes[i]:
+                for b in classes[j]:
+                    new_mat[i][j] += mat[a][b]
+    visited = [False for _ in range(r)]
+    l = []
+    for i in range(r):
+        if not visited[i]:
+            only_recurrent(new_mat, i, visited, l)
+    new_classes = []
+    for i in l:
+        new_classes.append(classes[i])
+    return new_classes
+    
+def only_recurrent(mat, i, visited, order):
+    visited[i] = True
+    has_neighbors = False
+    for j in range(len(mat)):
+        if i!=j and mat[i][j] != 0:
+            has_neighbors = True
+            if not visited[j]:
+                dfs(mat, j, visited, order)
+    if not has_neighbors:
+        # order.insert(0,i)
+        order.append(i)
 
 def transient(indices, recurrent_classes):
     new = []

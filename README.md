@@ -3,7 +3,9 @@ Python programs for solving Markov Chain and Martingale Problems
 
 ## Solving Irreducible Markov Chain for the Stationary Distribution
 
-First, edit stat_dist.py to use the desired matrix, then run the following command
+This algorithm finds the eigenvalue = 1 of the matrix, and then finds the eigenvector corresponding to that eigenvalue. The eigenvector, normalized to sum to 1, is the stationary distribution of the Markov Chain.
+
+First, edit stat_dist.py to use the desired matrix, then run the following command:
 ```
 python stat_dist.py
 ```
@@ -12,9 +14,11 @@ Output = π, where π(x) is the long term proportion of time spent in state x
 
 ## Solving Reducible Markov Chain for Hitting Probabilities and Transient State Visits
 
-**note: the order of transient states WILL change, but their relative order will not change
+This algorithm first uses Kosaraju's algorithm to find the strongly connected components of the graph. Then it uses a depth-first algorithm I came up with to distinguish the recurrent classes from transient states among the strongly connected components. From the original matrix, the algorithm derives matrices S and Q, where M = (1-Q)^-1 = the expected number of visits to each transient state conditioned on starting state, and M*S = the hitting probabilities conditioned on starting state.
 
-First, edit reducible.py to use the desired matrix, then run the following command
+**note: the indexes of the states WILL change, but their relative order will not change
+
+First, edit reducible.py to use the desired matrix, then run the following command:
 
 ```
 python reducible.py
