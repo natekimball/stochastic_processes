@@ -2,28 +2,22 @@ import numpy as np
 from scipy.linalg import eig
 from fractions import Fraction as frac
 from reducible import scc
+import math
 
 transition_mat = [
     [.5, .5],
     [.3, .7]
 ]
 
-# Algorithm 1: Finding the period d of transition_mat
-# 1. From an arbitrary root node, perform a breadth-first
-# search of G producing the rooted tree T.
-# 2. The period g is given by gcd{val(e) > 0 : e ∈ T}
-# implement algorithm 1
-
 def periodicity(mat):
     val, parent = levels(mat)
-    # return np.gcd.reduce([x for x in val if x > 0])
     other_vals = []
-    for j in len(mat):
-        for i in len(mat):
+    for j in range(len(mat)):
+        for i in range(len(mat)):
             if mat[i,j] > 0 and i!=j and parent[j] != i:
-                # edges.append((i,j))
-                other_vals.append(val[j] - val[i] if val[j] > val[i] else val[i] - val[j])
-    return np.gcd.reduce(other_vals)  
+                other_vals.append(val[j] - val[i] +1 if val[j] > val[i] else val[i] - val[j] + 1)
+    # print(other_vals)
+    return gdc(other_vals) if other_vals else 1
 
 def levels(mat):
     val = [0 for _ in mat]
@@ -36,8 +30,15 @@ def levels(mat):
                 parent[v] = u
                 val[v] = val[u] + 1
                 queue.append(v)
-    return val, parent    
+    return val, parent
 
+def gdc(vals):
+    gcd = vals[0]
+    for i in range(1, len(vals)):
+        gcd = math.gcd(gcd, vals[i])
+    return gcd
+
+transition_mat = np.array(transition_mat)
 classes = scc(transition_mat)
 if len(classes) > 1:
     print("reducible matrix does not have a stationary distribution")
@@ -48,7 +49,7 @@ if period > 1:
 else:
     print("Markov Chain is aperiodic, so it has a limiting distribution")
 
-S, U = eig(np.matrix(transition_mat).T)
+S, U = eig(transition_mat.T)
 stationary = np.array(U[:,np.isclose(S,1)].flat)
 stationary = stationary / np.sum(stationary)
 stationary = [str(frac(x).limit_denominator()) for x in stationary]
