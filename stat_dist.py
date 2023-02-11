@@ -9,7 +9,16 @@ transition_mat = [
     [.3, .7]
 ]
 
-def periodicity(mat):
+def periodicity(P):
+    n = P.shape[0]
+    for i in range(1, n+1):
+        Pi = np.linalg.matrix_power(P, i)
+        rank = np.linalg.matrix_rank(Pi)
+        if rank == n:
+            return i
+    return 1
+
+def periodicity_maybe(mat):
     val, parent = levels(mat)
     other_vals = []
     for j in range(len(mat)):
@@ -43,6 +52,7 @@ classes = scc(transition_mat)
 if len(classes) > 1:
     print("reducible matrix does not have a stationary distribution")
     exit()
+
 period = periodicity(transition_mat)
 if period > 1:
     print("Markov Chain has periodicity of %d" % period)
