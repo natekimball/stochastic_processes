@@ -1,9 +1,8 @@
 import numpy as np
-from scipy.linalg import eig 
-from fractions import Fraction as frac
+import util
 
 indices = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]
-mat = [
+transition_mat = [
     # [0, 2, 4, 6, 8, 10,12,14,16,18,20,22]
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],\
     [.5, 0, .5, 0, 0, 0, 0, 0, 0, 0, 0, 0],\
@@ -19,63 +18,48 @@ mat = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
 ]
 
-def main(mat):
-    mat = np.array(mat)
-    if mat.shape[0] != mat.shape[1]:
+def solve_reducible(P, indices=None, recurrent_classes=None):
+    P = np.array(P)
+    if P.shape[0] != P.shape[1]:
         print("not a square matrix")
         exit()
-    recurrent_classes = get_recurrent(mat)
+    if indices is None:
+        indices = list(range(P.shape[0]))
+    if not recurrent_classes:
+        recurrent_classes = get_recurrent(P)
     transient_states = transient(indices, recurrent_classes)
-    S,Q = get_S_and_Q(mat, recurrent_classes)
+    S,Q = get_S_and_Q(P, recurrent_classes)
     M = np.linalg.inv(np.identity(len(Q))-Q)
     hitting_probabilities = M@S
+    hitting_times = M@np.ones((M.shape[0],1))
     print("recurrent classes:", [[indices[i] for i in c] for c in recurrent_classes])
     print("transient states:", transient_states)
-    print("S:\n",S)
-    print("Q:\n",Q)
-    print("visits:\n",M)
-    print("hitting probabilities:\n",hitting_probabilities)
-    # print([[frac(str(x)) for x in y] for y in hitting_probabilities])
-    print("Nate's probability of winning is %f" % hitting_probabilities[-1,1])
-    print("Nate's probability of losing is %f" % hitting_probabilities[-1,0])
-    print("Nate's expected winnings is %f" % round(hitting_probabilities[-1,1]*2 - hitting_probabilities[-1,0]*20))
-    print("Justin's probability of winning is %f" % hitting_probabilities[0,1])
-    print("Justin's probability of losing is %f" % hitting_probabilities[0,0])
-    print("Justin's expected winnings is %f" % round(hitting_probabilities[0,1]*20 - hitting_probabilities[0,0]*2))
+    print("S:\n" + util.format_matrix(S))
+    print("Q:\n" + util.format_matrix(Q))
+    print("visits:\n" + util.format_matrix(M))
+    print("hitting times:\n" + util.format_matrix(hitting_times))
+    print("hitting probabilities:\n" + util.format_matrix(hitting_probabilities))
+    
+    print("Nate's probability of winning is", util.format(hitting_probabilities[-1,1]))
+    print("Nate's probability of losing is", util.format(hitting_probabilities[-1,0]))
+    print("Nate's expected winnings is", util.format(hitting_probabilities[-1,1]*2 - hitting_probabilities[-1,0]*20))
+    print("Justin's probability of winning is", util.format(hitting_probabilities[0,1]))
+    print("Justin's probability of losing is", util.format(hitting_probabilities[0,0]))
+    print("Justin's expected winnings is", util.format(hitting_probabilities[0,1]*20 - hitting_probabilities[0,0]*2))
 
-def dfs(M, i, visited, order):
-    visited[i] = True
-    for j in range(len(M)):
-        if M[i,j] != 0 and not visited[j]:
-            dfs(M, j, visited, order)
-    order.insert(0,i)
-
-def scc(M):
-    visited = [False for _ in range(len(M))]
-    order = []
-    for i in range(len(M)):
-        if not visited[i]:
-            dfs(M, i, visited, order)
-    classes = []
-    visited = [False for _ in range(len(M))]
-    while order:
-        i = order.pop()
-        if not visited[i]:
-            cl = []
-            dfs(M, i, visited, cl)
-            classes.append(cl)
-    return classes
-
-def get_recurrent(M):
-    classes = scc(M)
+def get_recurrent(P):
+    classes = util.scc(P)
+    if len(classes) == 1:
+        print("Markov Chain is irreducible")
+        util.solve(P)
+        exit()
     r = len(classes)
     new_mat = np.zeros((r,r))
     for i in range(r):
         for j in range(r):
-            print(i,j)
             for a in classes[i]:
                 for b in classes[j]:
-                    new_mat[i,j] += M[a,b]
+                    new_mat[i,j] += P[a,b]
     visited = [False for _ in range(r)]
     l = []
     for i in range(r):
@@ -84,14 +68,14 @@ def get_recurrent(M):
     new_classes = [classes[i] for i in l]
     return new_classes
     
-def only_recurrent(M, i, visited, order):
+def only_recurrent(P, i, visited, order):
     visited[i] = True
     has_neighbors = False
-    for j in range(len(M)):
-        if i!=j and M[i,j] != 0:
+    for j in range(len(P)):
+        if i!=j and P[i,j] != 0:
             has_neighbors = True
             if not visited[j]:
-                dfs(M, j, visited, order)
+                util.dfs(P, j, visited, order)
     if not has_neighbors:
         order.append(i)
     
@@ -125,24 +109,4 @@ def get_S_and_Q(mat, recurrent):
     return S,Q
 
 if __name__ == "__main__":
-    main(mat)
-
-# for if recurrence_classes are all are single states
-def get_S_and_Q_single_classes(mat, recurrence_classes):
-    r = len(recurrence_classes)
-    new_mat = np.array([[0 for _ in mat[0]] for _ in mat])
-    S = [[0 for _ in range(r)] for _ in range(len(mat)-r)]
-    Q = [[0 for _ in range(len(mat[0])-r)] for _ in range(len(mat)-r)]
-    q=0
-    for i in range(len(mat)):
-        if i in recurrence_classes:
-            q+=1
-            continue
-        s=0
-        for j in range(len(mat[0])):
-            if j in recurrence_classes:
-                S[i-q][recurrence_classes.index(j)] = mat[i][j]
-                s+=1
-            else:
-                Q[i-q][j-s] = mat[i][j]
-    return np.array(S), np.array(Q)
+    solve_reducible(transition_mat, indices)
