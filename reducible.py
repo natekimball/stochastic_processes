@@ -27,10 +27,16 @@ def solve_reducible(P, indices=None, recurrent_classes=None):
         indices = list(range(P.shape[0]))
     if not recurrent_classes:
         recurrent_classes = get_recurrent(P)
+    if indices is None:
+        indices = list(range(P.shape[0]))
+    if not recurrent_classes:
+        recurrent_classes = get_recurrent(P)
     transient_states = transient(indices, recurrent_classes)
+    S,Q = get_S_and_Q(P, recurrent_classes)
     S,Q = get_S_and_Q(P, recurrent_classes)
     M = np.linalg.inv(np.identity(len(Q))-Q)
     hitting_probabilities = M@S
+    hitting_times = M@np.ones((M.shape[0],1))
     hitting_times = M@np.ones((M.shape[0],1))
     print("recurrent classes:", [[indices[i] for i in c] for c in recurrent_classes])
     print("transient states:", transient_states)
@@ -60,6 +66,7 @@ def get_recurrent(P):
             for a in classes[i]:
                 for b in classes[j]:
                     new_mat[i,j] += P[a,b]
+                    new_mat[i,j] += P[a,b]
     visited = [False for _ in range(r)]
     l = []
     for i in range(r):
@@ -75,6 +82,7 @@ def only_recurrent(P, i, visited, order):
         if i!=j and P[i,j] != 0:
             has_neighbors = True
             if not visited[j]:
+                util.dfs(P, j, visited, order)
                 util.dfs(P, j, visited, order)
     if not has_neighbors:
         order.append(i)
