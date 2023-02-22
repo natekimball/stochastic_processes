@@ -1,11 +1,13 @@
 # stochastic_processes
-Python programs for solving Markov Chain and Martingale Problems
+
+Python programs for solving finite Markov Chain problems
 
 ## Solving Irreducible Markov Chain for the Stationary Distribution
 
 This algorithm finds the eigenvalue = 1 of the matrix, and then finds the eigenvector corresponding to that eigenvalue. The eigenvector, normalized to sum to 1, is the stationary distribution of the Markov Chain.
 
 First, edit stat_dist.py to use the desired matrix, then run the following command:
+
 ```
 python stat_dist.py
 ```
@@ -26,13 +28,13 @@ python reducible.py
 
 Output = the recurrent classes and transient states found, the expected number of visits to transient state j starting at transient state i (the (i,j) entry into the visits matrix), and the probability of hitting recurrent class j starting at transient state i (the (i,j) entry into the hitting probabilities matrix.
 
-### Example Usage:
+### Example Usage
 
 The origin of this example comes from a bet I made with my roommate. After playing poker, I had $20 in my pot and my roommate had $2, and we decided to go all-in repeatedly until one of us won the other's money. I was shocked to lose the bet, so I wanted to find out what the odds were of me winning. I decided to model the problem as a Markov Chain, where the states are the amount of money I have, and the transitions are the amount of money I win or lose in each round. I then used the reducible.py program to find the hitting probabilities, and thus, the probability of winning and expected value of the bet, which was 10/11 and $0, respectively.
 
 Input:
 
-```
+```python
 indices = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]
 mat = [
     # [0, 2, 4, 6, 8, 10,12,14,16,18,20,22]
@@ -51,8 +53,10 @@ mat = [
 ]
 ```
 
-Output: 
+Output:
+
 ```
+
 recurrent classes: [[0], [22]]
 transient states: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
 S:
