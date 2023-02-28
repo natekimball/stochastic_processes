@@ -4,24 +4,62 @@ from fractions import Fraction as frac
 import util
 import math
 
+# transition_mat = [
+#     [3/4, 1/4, 0, 0, 0, 0, 0],
+#     [1/2, 1/4, 1/4, 0, 0, 0, 0],
+#     [1/4, 1/4, 1/4, 1/4, 0, 0, 0],
+#     [1/4, 0, 1/4, 1/4, 1/4, 0, 0],
+#     [1/4, 0, 0, 1/4, 1/4, 1/4, 0],
+#     [1/4, 0, 0, 0, 1/4, 1/4, 1/4],
+#     [1/4, 0, 0, 0, 0, 1/4, 1/2]
+# ]
+
 transition_mat = [
-    [3/4, 1/4, 0, 0, 0, 0, 0],
-    [1/2, 1/4, 1/4, 0, 0, 0, 0],
-    [1/4, 1/4, 1/4, 1/4, 0, 0, 0],
-    [1/4, 0, 1/4, 1/4, 1/4, 0, 0],
-    [1/4, 0, 0, 1/4, 1/4, 1/4, 0],
-    [1/4, 0, 0, 0, 1/4, 1/4, 1/4],
-    [1/4, 0, 0, 0, 0, 1/4, 1/2]
+    [0,1,0],
+    [0,0,1],
+    [1,0,0]
+    # [0,.5,.5],
+    # [1,0,0],
+    # [1,0,0]
 ]
 
-def periodicity(mat):
+def find_period(mat):
     val, parent = levels(mat)
     other_vals = []
     for j in range(len(mat)):
         for i in range(len(mat)):
             if mat[i,j] > 0 and parent[j] != i:
                 other_vals.append(val[j] - val[i] +1 if val[j] > val[i] else val[i] - val[j] + 1)
-    return gdc(other_vals) if other_vals else 1
+    return gcd(other_vals) if other_vals else 1
+
+# def find_period(markov_chain):
+#     n = len(markov_chain)
+#     periods = []
+#     for i in range(n):
+#         # Find all paths from state i back to itself
+#         paths = [[i]]
+#         while True:
+#             new_paths = []
+#             for path in paths:
+#                 for j in range(n):
+#                     if markov_chain[path[-1]][j] > 0:
+#                         if j == i:
+#                             # Found a path back to i
+#                             periods.append(len(path))
+#                         else:
+#                             # Extend the path to j
+#                             new_paths.append(path + [j])
+#             if not new_paths:
+#                 break
+#             paths = new_paths
+
+    # Find the GCD of all periods
+    # period_gcd = gcd(periods)
+
+    # if period_gcd > 1:
+    #     print("Markov chain is periodic with period", period_gcd)
+    # else:
+    #     print("Markov chain is aperiodic")
 
 
 def levels(mat):
@@ -37,7 +75,7 @@ def levels(mat):
                 queue.append(v)
     return val, parent
 
-def gdc(vals):
+def gcd(vals):
     gcd = vals[0]
     for i in range(1, len(vals)):
         gcd = math.gcd(gcd, vals[i])
@@ -48,21 +86,24 @@ def stationary_dist(transition_mat):
     stationary = np.array(U[:,np.isclose(S,1)].flat)
     return (stationary / np.sum(stationary)).real
 
-def solve_irreducible(transition_mat):
+def solve_irreducible(transition_mat, indices=None):
     transition_mat = np.array(transition_mat)
     if len(util.scc(transition_mat)) > 1:
         print("reducible matrix does not have a unique stationary distribution")
         exit()
     print("Markov Chain is irreducible, so it has a unique stationary distribution")
-    
-    period = periodicity(transition_mat)
-    if period > 1:
-        print("Markov Chain has periodicity of %d" % period)
-    else:
-        print("Markov Chain is aperiodic, so it has a limiting distribution")
-        
+
+    indices = [i for i in range(len(transition_mat))] if not indices else indices
+    print("indices: %s" % indices)
     π = stationary_dist(transition_mat)
     print("π: %s" % util.format_array(π))
+    
+    period = find_period(transition_mat)
+    if period > 1:
+        print("Markov Chain might have a period of %d" % period)
+    else:
+        print("Markov Chain might be aperiodic, so it has a limiting distribution")
+    print("verify periodicity, unsure if algorithm is correct")
     
 if __name__ == "__main__":
     solve_irreducible(transition_mat)

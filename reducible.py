@@ -45,13 +45,6 @@ def solve_reducible(P, indices=None, recurrent_classes=None):
     print("visits:\n" + util.format_matrix(M))
     print("hitting times:\n" + util.format_matrix(hitting_times))
     print("hitting probabilities:\n" + util.format_matrix(hitting_probabilities))
-    
-    print("Nate's probability of winning is", util.format(hitting_probabilities[-1,1]))
-    print("Nate's probability of losing is", util.format(hitting_probabilities[-1,0]))
-    print("Nate's expected winnings is", util.format(hitting_probabilities[-1,1]*2 - hitting_probabilities[-1,0]*20))
-    print("Justin's probability of winning is", util.format(hitting_probabilities[0,1]))
-    print("Justin's probability of losing is", util.format(hitting_probabilities[0,0]))
-    print("Justin's expected winnings is", util.format(hitting_probabilities[0,1]*20 - hitting_probabilities[0,0]*2))
 
 def get_recurrent(P):
     classes = util.scc(P)
