@@ -97,6 +97,8 @@ def solve_irreducible(transition_mat, indices=None):
     print("indices: %s" % indices)
     π = stationary_dist(transition_mat)
     print("π: %s" % util.format_array(π))
+    print("E[T\u2096]: %s" % util.format_array(1/π))
+    assert np.isclose(np.sum(π), 1)
     
     period = find_period(transition_mat)
     if period > 1:

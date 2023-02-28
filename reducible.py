@@ -45,6 +45,7 @@ def solve_reducible(P, indices=None, recurrent_classes=None):
     print("visits:\n" + util.format_matrix(M))
     print("hitting times:\n" + util.format_matrix(hitting_times))
     print("hitting probabilities:\n" + util.format_matrix(hitting_probabilities))
+    assert np.allclose(np.sum(hitting_probabilities, axis=1), 1)
 
 def get_recurrent(P):
     classes = util.scc(P)
