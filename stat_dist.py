@@ -1,6 +1,5 @@
 import numpy as np
 from scipy.linalg import eig
-from fractions import Fraction as frac
 import util
 import math
 
@@ -81,31 +80,39 @@ def gcd(vals):
         gcd = math.gcd(gcd, vals[i])
     return gcd
 
-def stationary_dist(transition_mat):
-    S, U = eig(transition_mat.T)
+def stationary_dist(P):
+    S, U = eig(P.T)
     stationary = np.array(U[:,np.isclose(S,1)].flat)
     return (stationary / np.sum(stationary)).real
 
-def solve_irreducible(transition_mat, indices=None):
-    transition_mat = np.array(transition_mat)
-    if len(util.scc(transition_mat)) > 1:
+def solve_irreducible(P, indices=None):
+    if len(util.scc(P)) > 1:
         print("reducible matrix does not have a unique stationary distribution")
         exit()
     print("Markov Chain is irreducible, so it has a unique stationary distribution")
 
-    indices = [i for i in range(len(transition_mat))] if not indices else indices
+    indices = list(range(len(P))) if not indices else indices
     print("indices: %s" % indices)
-    π = stationary_dist(transition_mat)
+    π = stationary_dist(P)
     print("π: %s" % util.format_array(π))
     print("E[T\u2096]: %s" % util.format_array(1/π))
     assert np.isclose(np.sum(π), 1)
     
-    period = find_period(transition_mat)
-    if period > 1:
-        print("Markov Chain might have a period of %d" % period)
+    # period = find_period(P)
+    # if period > 1:
+    #     print("Markov Chain might have a period of %d" % period)
+    # else:
+    #     print("Markov Chain might be aperiodic, so it has a limiting distribution")
+    power = np.linalg.matrix_power(P,20)
+    if np.allclose(power, power@P):
+        print("Markov Chain is likely aperiodic, so it has a limiting distribution")
     else:
-        print("Markov Chain might be aperiodic, so it has a limiting distribution")
-    print("verify periodicity, unsure if algorithm is correct")
+        power = np.linalg.matrix_power(P,40)
+        if np.allclose(power, power@P):
+            print("Markov Chain is likely aperiodic, so1`    it has a limiting distribution")
+        else:
+            print("Markov Chain is likely not aperiodic")
+    print("verify periodicity, regardless")
     
 if __name__ == "__main__":
-    solve_irreducible(transition_mat)
+    solve_irreducible(np.array(transition_mat))

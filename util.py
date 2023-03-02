@@ -4,7 +4,8 @@ from reducible import solve_reducible
 from stat_dist import solve_irreducible
 
 def solve(P, indices=None, recurrent_classes=None):
-    assert np.allclose(np.sum(P, axis=1), np.ones(P.shape[0])), "P is not a valid stochastiic matrix"
+    P = np.array(P)
+    assert np.allclose(np.sum(P, axis=1), np.ones(P.shape[0])), "P is not a valid stochastic matrix"
     if recurrent_classes or len(scc(P)) > 1:
         solve_reducible(P, indices, recurrent_classes)
     else:

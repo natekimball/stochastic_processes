@@ -19,7 +19,6 @@ transition_mat = [
 ]
 
 def solve_reducible(P, indices=None, recurrent_classes=None):
-    P = np.array(P)
     if P.shape[0] != P.shape[1]:
         print("not a square matrix")
         exit()
@@ -36,7 +35,6 @@ def solve_reducible(P, indices=None, recurrent_classes=None):
     S,Q = get_S_and_Q(P, recurrent_classes)
     M = np.linalg.inv(np.identity(len(Q))-Q)
     hitting_probabilities = M@S
-    hitting_times = M@np.ones((M.shape[0],1))
     hitting_times = M@np.ones((M.shape[0],1))
     print("recurrent classes:", [[indices[i] for i in c] for c in recurrent_classes])
     print("transient states:", transient_states)
@@ -111,4 +109,4 @@ def get_S_and_Q(mat, recurrent):
     return S,Q
 
 if __name__ == "__main__":
-    solve_reducible(transition_mat, indices)
+    solve_reducible(np.array(transition_mat), indices)
