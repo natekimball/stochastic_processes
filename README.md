@@ -26,17 +26,6 @@ First, edit reducible.py to use the desired matrix, then run the following comma
 python reducible.py
 ```
 
-## Solving Hidden Markov Models
-
-First, edit hmm.py to use the desired transition, emission, initial distribution, and observation vectors.
-Then run the following command:
-
-```
-python hmm.py
-```
-
-Output = the recurrent classes and transient states found, the expected number of visits to transient state j starting at transient state i (the (i,j) entry into the visits matrix), and the probability of hitting recurrent class j starting at transient state i (the (i,j) entry into the hitting probabilities matrix.
-
 ### Example Usage
 
 The origin of this example comes from a bet I made with my roommate. After playing poker, I had $20 in my pot and my roommate had $2, and we decided to go all-in repeatedly until one of us won the other's money. I was shocked to lose the bet, so I wanted to find out what the odds were of me winning. I decided to model the problem as a Markov Chain, where the states are the amount of money I have, and the transitions are the amount of money I win or lose in each round. I then used the reducible.py program to find the hitting probabilities, and thus, the probability of winning and expected value of the bet, which was 10/11 and $0, respectively.
@@ -129,3 +118,14 @@ Justin's probability of winning is 0.090909
 Justin's probability of losing is 0.909091
 Justin's expected winnings is 0.000000
 ```
+
+## Solving Hidden Markov Models
+
+First, edit hmm.py to use the desired transition, emission, initial distribution, and observation vectors.
+Then run the following command:
+
+```
+python hmm.py
+```
+
+Output = filtering and smoothing probabilities and decoded path
