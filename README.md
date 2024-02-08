@@ -1,6 +1,6 @@
 # stochastic_processes
 
-Python programs for solving finite Markov Chain problems
+Python programs for solving Markov Chain problems.
 
 ## Solving Irreducible Markov Chain for the Stationary Distribution
 
