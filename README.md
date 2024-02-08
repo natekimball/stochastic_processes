@@ -1,6 +1,6 @@
 # stochastic_processes
 
-Python programs for solving Markov Chain problems.
+Python programs for solving Markov Chain, Hidden Markov Model, and other problems.
 
 ## Solving Irreducible Markov Chain for the Stationary Distribution
 
@@ -25,8 +25,6 @@ First, edit reducible.py to use the desired matrix, then run the following comma
 ```
 python reducible.py
 ```
-
-Output = the recurrent classes and transient states found, the expected number of visits to transient state j starting at transient state i (the (i,j) entry into the visits matrix), and the probability of hitting recurrent class j starting at transient state i (the (i,j) entry into the hitting probabilities matrix.
 
 ### Example Usage
 
@@ -120,3 +118,14 @@ Justin's probability of winning is 0.090909
 Justin's probability of losing is 0.909091
 Justin's expected winnings is 0.000000
 ```
+
+## Solving Hidden Markov Models
+
+First, edit hmm.py to use the desired transition, emission, initial distribution, and observation vectors.
+Then run the following command:
+
+```
+python hmm.py
+```
+
+Output = filtering and smoothing probabilities and decoded path
