@@ -8,16 +8,16 @@ def diagonalize(A):
     D = np.diag(evals)
     Q_inv = np.linalg.inv(Q)
     assert np.allclose(A,Q@D@Q_inv)
-    print("Q:\n", Q)
-    # print("Q\n" + util.format_matrix(Q))
+    # print("Q:\n", Q)
+    print("Q\n" + util.format_matrix(Q))
     print("D:\n" + util.format_matrix(D))
-    print("Q_inv:\n", Q_inv)
-    # print("Q_inv\n" + util.format_matrix(Q_inv))
+    # print("Q_inv:\n", Q_inv)
+    print("Q_inv\n" + util.format_matrix(Q_inv))
     return Q, D, Q_inv
 
 def compute_Pt(A, t):
     Q, D, Q_inv = diagonalize(A)
-    exptA = np.expm(t*A)
+    exptA = np.exp(t*A) # expm?
     exptD = np.diag(np.exp(t*D.diagonal()))
     eat = Q@exptD@Q_inv
     assert np.allclose(exptA, eat)
@@ -40,6 +40,7 @@ def stat_dist(A):
     util.print_lin_system(new_A)
     rref = np.array(sp.Matrix(new_A).rref()[0]).astype('float64')
     pi = rref[:-1,-1].flatten()
+    # pi = np.linalg.solve(new_A[:,:-1], new_A[:,-1])
     print("π: %s" % util.format_array(pi))
     assert np.allclose(pi@A, 0)
     return pi
@@ -62,6 +63,9 @@ def hitting_times(A, recurrent_state):
     print("hitting_times:\n"+util.format_array(M1))
     return M1
 
+def is_irreducible(P):
+    return util.scc(P) == 1
+
 def expected_time_at(A, state):
     print("E[T] = " + util.format(-1/A[state,state]))
 
@@ -73,14 +77,15 @@ def expected_time_at(A, state):
 # D = Q_inv@A@Q
 # e^tA = Q@e^tD@Q_inv = Q@diag(e^t*lambda)@Q_inv
 
-alphas = np.array([
-    [0, 1, 1, 0],
-    [0, 0, 1, 0],
-    [1, 1, 0, 1],
-    [0, 0, 1, 0]
+# alphas = np.array([
+# ])
+# A = infinitessimal_generator(alphas)
+A = np.array([
+    [-2, 1, 1],
+    [0, -2, 2],
+    [1, 2, -3]
 ])
-A = infinitessimal_generator(alphas)
 stat_dist(A)
-expected_time_at(A, 0)
-h = hitting_times(A, 3)
-print("time until hitting state 4 from state 1: %d" % h[0])
+# expected_time_at(A, 0)
+h = hitting_times(A, 1)
+print("time until hitting state 2 from state 3: %d" % h[1])

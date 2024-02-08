@@ -30,7 +30,7 @@ def solve_reducible(P, indices=None, recurrent_classes=None):
         indices = list(range(P.shape[0]))
     if not recurrent_classes:
         recurrent_classes = get_recurrent(P)
-    transient_states = transient(indices, recurrent_classes)
+    transient_states = util.transient(indices, recurrent_classes)
     S,Q = get_S_and_Q(P, recurrent_classes)
     S,Q = get_S_and_Q(P, recurrent_classes)
     M = np.linalg.inv(np.identity(len(Q))-Q)
@@ -78,27 +78,14 @@ def only_recurrent(P, i, visited, order):
                 util.dfs(P, j, visited, order)
     if not has_neighbors:
         order.append(i)
-    
-def transient(indices, recurrent_classes):
-    return [r for i,r in enumerate(indices) if find_class(i, recurrent_classes) == -1]
-
-def find_class(j, classes):
-    for i,c in enumerate(classes): 
-        if j in c:
-            return i
-    return -1
 
 def get_S_and_Q(mat, recurrent):
-    rs = []
-    for c in recurrent:
-        for a in c:
-            rs.append(a)
+    recurrent_states = np.array(recurrent).flatten()
 
-    S = np.zeros((mat.shape[0]-len(rs), len(recurrent)))
-    Q = np.zeros((mat.shape[0]-len(rs), mat.shape[0]-len(rs)))
-
+    S = np.zeros((mat.shape[0]-len(recurrent_states), len(recurrent)))
+    Q = np.zeros((mat.shape[0]-len(recurrent_states), mat.shape[0]-len(recurrent_states)))
     
-    transient = [i for i in range(mat.shape[0]) if i not in rs]
+    transient = [i for i in range(mat.shape[0]) if i not in recurrent_states]
     for i,t in enumerate(transient):
         for j,r in enumerate(recurrent):
             for k in r:

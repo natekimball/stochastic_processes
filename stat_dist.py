@@ -109,7 +109,7 @@ def solve_irreducible(P, indices=None):
     else:
         power = np.linalg.matrix_power(P,40)
         if np.allclose(power, power@P):
-            print("Markov Chain is likely aperiodic, so1`    it has a limiting distribution")
+            print("Markov Chain is likely aperiodic, so it has a limiting distribution")
         else:
             print("Markov Chain is likely not aperiodic")
     print("verify periodicity, regardless")
