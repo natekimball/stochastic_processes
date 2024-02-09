@@ -18,28 +18,6 @@ pi = np.array([0.5, 0.5])
 # observations
 Y = np.array([3, 1, 1, 3, 2, 3, 2, 2, 2, 3, 2, 2, 2, 2, 2, 3, 3, 1, 1, 2]) -1
 
-
-def main():
-    alpha = forward(T, M, Y, pi)
-    print("alpha: \n", alpha.T)
-    beta, joint_prob = backward(T, M, Y, pi)
-    print("beta: \n", beta.T)
-    print("joint observation probability: ", joint_prob)
-    filter = filtering(T, M, Y, pi)
-    print("filtering: \n", filter.T)
-    smooth = smoothing(T, M, Y, pi)
-    print("smoothing: \n", smooth.T)
-    path = np.argmax(smooth, axis=0)
-    print("point-wise most likely path: \n", path)
-    path = viterbi(T, M, Y, pi)
-    print("decoded path: \n", path)
-    new_T, new_M, new_pi = baum_welch(T, M, Y, pi)
-    print("new transition matrix: \n", new_T)
-    print("new emission matrix: \n", new_M)
-    print("new initial state: \n", new_pi)
-    _, new_joint_prob = backward(new_T, new_M, Y, new_pi)
-    print("new joint observation probability: ", new_joint_prob)
-
 # forward algorithm
 def forward(T, M, Y, pi):
     N = len(T)
@@ -98,7 +76,7 @@ def viterbi(T, M, Y, pi):
 
 # hmm learning
 def baum_welch(T, M, Y, pi):
-    # lambda* = argmax_lambda P(Y1,...Y2;lambda)
+    # P(Y1,...Y2;lambda') > P(Y1,...Y2;lambda)
     N = len(T)
     alpha = forward(T, M, Y, pi)
     beta, _ = backward(T, M, Y, pi)
@@ -118,6 +96,27 @@ def baum_welch(T, M, Y, pi):
         new_M[:,k] = np.sum(gamma[:,Y==k], axis=1) / np.sum(gamma, axis=1)
     new_pi = gamma[:,0]
     return new_T, new_M, new_pi
+
+def main():
+    alpha = forward(T, M, Y, pi)
+    print("alpha: \n", alpha.T)
+    beta, joint_prob = backward(T, M, Y, pi)
+    print("beta: \n", beta.T)
+    print("joint observation probability: ", joint_prob)
+    filter = filtering(T, M, Y, pi)
+    print("filtering: \n", filter.T)
+    smooth = smoothing(T, M, Y, pi)
+    print("smoothing: \n", smooth.T)
+    path = np.argmax(smooth, axis=0)
+    print("point-wise most likely path: \n", path)
+    path = viterbi(T, M, Y, pi)
+    print("decoded path: \n", path)
+    new_T, new_M, new_pi = baum_welch(T, M, Y, pi)
+    print("new transition matrix: \n", new_T)
+    print("new emission matrix: \n", new_M)
+    print("new initial state: \n", new_pi)
+    _, new_joint_prob = backward(new_T, new_M, Y, new_pi)
+    print("new joint observation probability: ", new_joint_prob)
 
 if __name__ == "__main__":
     main()
