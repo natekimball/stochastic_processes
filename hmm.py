@@ -1,39 +1,50 @@
 import numpy as np
 
-# # transition matrix
-# T = np.array([
-#     [0.5, 0.5],
-#     [0.5, 0.5],
-# ])
+# transition matrix
+T = np.array([
+    [0.5, 0.5],
+    [0.5, 0.5],
+])
 
-# # emmision matrix
-# M = np.array([
-#     [0.4, 0.1, 0.5],
-#     [0.1, 0.5, 0.4],
-# ])
+# emmision matrix
+M = np.array([
+    [0.4, 0.1, 0.5],
+    [0.1, 0.5, 0.4],
+])
 
-# # observations
-# Y = np.array([3, 1, 1, 3, 2, 3, 2, 2, 2, 3, 2, 2, 2, 2, 2, 3, 3, 1, 1, 2])
+# observations
+Y = np.array([3, 1, 1, 3, 2, 3, 2, 2, 2, 3, 2, 2, 2, 2, 2, 3, 3, 1, 1, 2]) -1
 
-# # initial state
-# pi = np.array([0.5, 0.5])
+# initial state
+pi = np.array([0.5, 0.5])
+
+
+def main():
+    filter = filtering(T, M, Y, pi)
+    print("filtering: \n", filter.T)
+    smooth = smoothing(T, M, Y, pi)
+    print("smoothing: \n", smooth.T)
+    path = viterbi(T, M, Y, pi)
+    print("decoded path: \n", path)
+    new_T, new_M, new_pi = baum_welch(T, M, Y, pi)
+    print("new transition matrix: \n", new_T)
+    print("new emission matrix: \n", new_M)
+    print("new initial state: \n", new_pi)
 
 # forward algorithm
 def forward(T, M, Y, pi):
     N = len(T)
-    T = T.T
-    M = M.T
     alpha = np.zeros((N, len(Y)))
-    alpha[:,0] = pi * M[Y[0]]
+    alpha[:,0] = pi * M[:,Y[0]]
     for t in range(1, len(Y)):
         for i in range(N):
-            alpha[i,t] = M[Y[t],i] * np.sum(alpha[:,t-1] * T[i])
+            alpha[i,t] = M[:,Y[t]][i] * np.sum(alpha[:,t-1] * T[:,i])
     return alpha
 
 # filtering algorithm
 def filtering(T, M, Y, pi):
     alpha = forward(T, M, Y, pi)
-    return (alpha / np.sum(alpha, axis=0)).T
+    return alpha / np.sum(alpha, axis=0)
 
 # backward algorithm
 def backward(T, M, Y, pi):
@@ -55,42 +66,63 @@ def smoothing(T, M, Y, pi):
     # print("beta", beta.T)
     ab = alpha * beta
     # print("alpha * beta", ab.T)
-    return (ab / np.sum(ab, axis=0)).T
+    return ab / np.sum(ab, axis=0)
 
 # viterbi decoding algorithm
 def viterbi(T, M, Y, pi):
     N = len(T)
     T = T.T
     M = M.T
-    psi = np.zeros((N, len(Y)))
+    delta = np.zeros((N, len(Y)))
     parents = np.zeros((N, len(Y)))
-    psi[:,0] = pi * M[Y[0]]
+    delta[:,0] = pi * M[Y[0]]
     for t in range(1, len(Y)):
         for i in range(N):
-            psi[i,t] = M[Y[t],i] * np.max(psi[:,t-1] * T[i])
-            parents[i,t] = np.argmax(psi[:,t-1] * T[i])
-    # print("psi: \n", psi)
+            delta[i,t] = M[Y[t],i] * np.max(delta[:,t-1] * T[i])
+            parents[i,t] = np.argmax(delta[:,t-1] * T[i])
+    # print("delta: \n", delta)
     path = np.zeros(len(Y))
-    path[-1] = np.argmax(psi[:,-1])
+    path[-1] = np.argmax(delta[:,-1])
     for t in range(len(Y)-2, -1, -1):
         path[t] = parents[int(path[t+1]),t+1]
     return path
 
-T = np.array([
-    [0, .5, .5],
-    [0, 0.9, 0.1],
-    [0, 0, 1]
-])
-M = np.array([
-    [0.5, 0.5],
-    [0.9, 0.1],
-    [0.1, 0.9]
-])
-pi = np.array([1, 0, 0])
-Y = np.array([2, 3, 3, 2, 2, 2, 3, 2, 3]) - 2 
-filter = filtering(T, M, Y, pi)
-print("filtering: \n", filter)
-smooth = smoothing(T, M, Y, pi)
-print("smoothing: \n", smooth)
-path = viterbi(T, M, Y, pi)
-print("decoded path: \n", path)
+# iterative hmm learning
+def baum_welch(T=None, M=None, Y=None, pi=None):
+    # lambda* = argmax_lambda P(Y1,...Y2;lambda)
+    N = len(T)
+    alpha = forward(T, M, Y, pi)
+    beta, _ = backward(T, M, Y, pi)
+    gamma = smoothing(T, M, Y, pi)
+    xi = np.zeros((N, N, len(Y)-1))
+    for t in range(len(Y)-1):
+        for i in range(N):
+            for j in range(N):
+                xi[i,j,t] = alpha[i,t] * T[i,j] * M[j,Y[t+1]] * beta[j,t+1]
+        xi[:,:,t] = xi[:,:,t] / np.sum(xi[:,:,t])
+    # print("xi: \n", xi)
+    E_transitions = np.sum(xi, axis=2)
+    E_visits = np.sum(gamma[:,:-1], axis=1)
+    new_T = E_transitions / E_visits[:, np.newaxis]
+    new_M = np.zeros_like(M)
+    for k in range(M.shape[1]):
+        new_M[:,k] = np.sum(gamma[:,Y==k], axis=1) / np.sum(gamma, axis=1)
+    new_pi = gamma[:,0]
+    return new_T, new_M, new_pi
+
+
+# T = np.array([
+#     [0, .5, .5],
+#     [0, 0.9, 0.1],
+#     [0, 0, 1]
+# ])
+# M = np.array([
+#     [0.5, 0.5],
+#     [0.9, 0.1],
+#     [0.1, 0.9]
+# ])
+# pi = np.array([1, 0, 0])
+# Y = np.array([2, 3, 3, 2, 2, 2, 3, 2, 3]) - 2 
+
+if __name__ == "__main__":
+    main()
